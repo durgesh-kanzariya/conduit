@@ -52,7 +52,7 @@ def get_injection_response():
     from app.engine.triage import TriageDecision
     return TriageDecision(
         category="security_flag",
-        priority="P1",
+        priority="P3",
         summary="Message contains prompt injection attempt. Classified by pre-detection layer.",
         suggested_action="Flag for security review. Do not process automatically.",
         needs_human=True,

@@ -9,6 +9,7 @@ const API_BASE = "http://127.0.0.1:8000";
 function App() {
   const [inputPayload, setInputPayload] = useState("");
   const [format, setFormat] = useState("Auto");
+  const [provider, setProvider] = useState("groq");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -45,7 +46,7 @@ function App() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/triage`, {
+      const res = await fetch(`${API_BASE}/triage?provider=${provider}`, {
         method: "POST",
         headers,
         body
@@ -108,6 +109,17 @@ function App() {
                   <option value="JSON">JSON</option>
                   <option value="HTML">HTML</option>
                   <option value="CSV">CSV</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-500 font-semibold">LLM:</span>
+                <select
+                  value={provider}
+                  onChange={(e) => setProvider(e.target.value)}
+                  className="bg-[#ffffff] border border-[#e5e7eb] text-xs text-[#111111] px-2 py-1.5 rounded focus:outline-none focus:border-[#111111] font-semibold cursor-pointer"
+                >
+                  <option value="groq">Groq (llama-3.3)</option>
+                  <option value="ollama">Ollama (gpt-oss)</option>
                 </select>
               </div>
               <button

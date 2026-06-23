@@ -5,6 +5,7 @@ const API_BASE = "http://127.0.0.1:8000";
 
 export default function EvalReport() {
   const [report, setReport] = useState(null);
+  const [provider, setProvider] = useState("groq");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -12,7 +13,7 @@ export default function EvalReport() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/evaluate`);
+      const res = await fetch(`${API_BASE}/evaluate?provider=${provider}`);
       if (!res.ok) throw new Error("Evaluation run failed");
       const data = await res.json();
       setReport(data);
@@ -38,17 +39,30 @@ export default function EvalReport() {
 
   return (
     <div className="bg-white border border-gray-200 rounded p-4 text-gray-900 flex flex-col space-y-4 w-full" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      <div className="flex items-center justify-between pb-3 border-b border-gray-150">
+      <div className="flex flex-wrap gap-3 items-center justify-between pb-3 border-b border-gray-150">
         <span className="text-xs font-bold tracking-wider uppercase text-gray-500">
           Evaluation Report Pipeline
         </span>
-        <button
-          onClick={runEvaluation}
-          disabled={loading}
-          className="bg-black hover:bg-gray-800 text-white disabled:opacity-40 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors"
-        >
-          {loading ? 'Running...' : 'Run Evaluation'}
-        </button>
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-500 font-semibold">LLM:</span>
+            <select
+              value={provider}
+              onChange={(e) => setProvider(e.target.value)}
+              className="bg-[#ffffff] border border-[#e5e7eb] text-xs text-[#111111] px-2 py-1.5 rounded focus:outline-none focus:border-[#111111] font-semibold cursor-pointer"
+            >
+              <option value="groq">Groq (llama-3.3)</option>
+              <option value="ollama">Ollama (gpt-oss)</option>
+            </select>
+          </div>
+          <button
+            onClick={runEvaluation}
+            disabled={loading}
+            className="bg-black hover:bg-gray-800 text-white disabled:opacity-40 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors"
+          >
+            {loading ? 'Running...' : 'Run Evaluation'}
+          </button>
+        </div>
       </div>
 
       {error && (

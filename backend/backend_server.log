@@ -1,0 +1,153 @@
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.01 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.27 ms
+[TIMING] Normalizer: Overall normalization completed in 0.32 ms
+[STATUS] Triage Engine: Starting LLM completion call (Attempt 1/3)...
+[ERROR] Triage Engine: API request call failed. Exception details: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kvt25fk0e3dt5575yvg1rhw5` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99144, Requested 1801. Please try again in 13m36.48s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+[STATUS] API Warning: Groq Rate Limit (429) hit / Tokens exhausted.
+[STATUS] Triage Engine: Retrying in 1.22 seconds...
+[STATUS] Triage Engine: Starting LLM completion call (Attempt 2/3)...
+[ERROR] Triage Engine: API request call failed. Exception details: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kvt25fk0e3dt5575yvg1rhw5` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99143, Requested 1801. Please try again in 13m35.616s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+[STATUS] API Warning: Groq Rate Limit (429) hit / Tokens exhausted.
+[STATUS] Triage Engine: Retrying in 2.24 seconds...
+[STATUS] Triage Engine: Starting LLM completion call (Attempt 3/3)...
+[ERROR] Triage Engine: API request call failed. Exception details: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kvt25fk0e3dt5575yvg1rhw5` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99140, Requested 1801. Please try again in 13m33.024s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+[STATUS] API Warning: Groq Rate Limit (429) hit / Tokens exhausted.
+INFO:     127.0.0.1:56511 - "POST /api/triage HTTP/1.1" 200 OK
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.01 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.26 ms
+[TIMING] Normalizer: Overall normalization completed in 0.29 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[TIMING] Triage Engine: Ollama API response received in 6414.42 ms
+[TIMING] Triage Engine: Response text cleaned and JSON parsed in 0.01 ms
+[TIMING] Triage Engine: Pydantic TriageDecision validation completed in 0.02 ms
+INFO:     127.0.0.1:55118 - "POST /api/triage/ollama HTTP/1.1" 200 OK
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.01 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.20 ms
+[TIMING] Normalizer: Overall normalization completed in 0.24 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[TIMING] Triage Engine: Ollama API response received in 5838.22 ms
+[TIMING] Triage Engine: Response text cleaned and JSON parsed in 0.01 ms
+[TIMING] Triage Engine: Pydantic TriageDecision validation completed in 0.02 ms
+INFO:     127.0.0.1:55123 - "POST /api/triage/ollama HTTP/1.1" 200 OK
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.01 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.19 ms
+[TIMING] Normalizer: Overall normalization completed in 0.23 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[TIMING] Triage Engine: Ollama API response received in 4883.96 ms
+[TIMING] Triage Engine: Response text cleaned and JSON parsed in 0.03 ms
+[TIMING] Triage Engine: Pydantic TriageDecision validation completed in 0.06 ms
+INFO:     127.0.0.1:55136 - "POST /api/triage/ollama HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62446 - "POST /api/evaluate?provider=ollama HTTP/1.1" 405 Method Not Allowed
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.02 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.17 ms
+[TIMING] Normalizer: Overall normalization completed in 0.22 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[TIMING] Triage Engine: Ollama API response received in 5875.17 ms
+[TIMING] Triage Engine: Response text cleaned and JSON parsed in 0.07 ms
+[TIMING] Triage Engine: Pydantic TriageDecision validation completed in 0.11 ms
+[TIMING] Normalizer: Plain text formatting completed in 0.01 ms
+[TIMING] Normalizer: Character length check passed in 0.04 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.47 ms
+[TIMING] Normalizer: Overall normalization completed in 0.70 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[TIMING] Triage Engine: Ollama API response received in 3353.33 ms
+[TIMING] Triage Engine: Response text cleaned and JSON parsed in 0.03 ms
+[TIMING] Triage Engine: Pydantic TriageDecision validation completed in 0.04 ms
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.02 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.22 ms
+[TIMING] Normalizer: Overall normalization completed in 0.27 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[TIMING] Triage Engine: Ollama API response received in 6780.23 ms
+[TIMING] Triage Engine: Response text cleaned and JSON parsed in 0.02 ms
+[TIMING] Triage Engine: Pydantic TriageDecision validation completed in 0.03 ms
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.04 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.63 ms
+[TIMING] Normalizer: Overall normalization completed in 0.76 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Read timed out. (read timeout=15.0)
+[STATUS] Triage Engine: Retrying in 1.37 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 2/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 2.26 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 3/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.02 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.29 ms
+[TIMING] Normalizer: Overall normalization completed in 0.35 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 1.48 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 2/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 2.19 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 3/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.01 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.59 ms
+[TIMING] Normalizer: Overall normalization completed in 0.67 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 1.38 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 2/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 2.15 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 3/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.02 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.48 ms
+[TIMING] Normalizer: Overall normalization completed in 0.54 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 1.49 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 2/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 2.50 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 3/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.11 ms
+[TIMING] Normalizer: HTML sanitization completed in 2.25 ms
+[TIMING] Normalizer: Overall normalization completed in 3.37 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 1.37 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 2/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 2.11 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 3/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.03 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.32 ms
+[TIMING] Normalizer: Overall normalization completed in 0.40 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 1.41 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 2/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 2.19 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 3/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[TIMING] Normalizer: Plain text formatting completed in 0.00 ms
+[TIMING] Normalizer: Character length check passed in 0.02 ms
+[TIMING] Normalizer: HTML sanitization completed in 0.34 ms
+[TIMING] Normalizer: Overall normalization completed in 0.41 ms
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 1/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 1.17 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 2/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+[STATUS] Triage Engine: Retrying in 2.46 seconds...
+[STATUS] Triage Engine: Starting Ollama LLM completion call (Attempt 3/3)...
+[ERROR] Triage Engine: Ollama request failed. Exception: HTTPSConnectionPool(host='ollama.com', port=443): Max retries exceeded with url: /api/chat (Caused by NameResolutionError("HTTPSConnection(host='ollama.com', port=443): Failed to resolve 'ollama.com' ([Errno 11001] getaddrinfo failed)"))
+INFO:     127.0.0.1:62452 - "GET /api/evaluate?provider=ollama HTTP/1.1" 200 OK

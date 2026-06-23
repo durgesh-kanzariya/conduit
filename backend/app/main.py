@@ -28,6 +28,7 @@ class TriageRequest(BaseModel):
 
 class BatchRequest(BaseModel):
     messages: List[Any]
+    provider: str = None
 
 @app.get("/health")
 @app.get("/api/health")
@@ -104,7 +105,7 @@ def get_test_cases():
 
 @app.post("/triage")
 @app.post("/api/triage")
-async def post_triage(request: Request):
+async def post_triage(request: Request, provider: str = None):
     """
     Receives unverified raw input via any Content-Type, runs it through the normalization pipeline,
     and forwards it to the triage engine.
@@ -113,12 +114,14 @@ async def post_triage(request: Request):
     content_type = request.headers.get("content-type", "").lower()
     
     raw_input = None
+    body_provider = None
     
     try:
         if "application/json" in content_type:
             try:
                 body_json = await request.json()
                 if isinstance(body_json, dict):
+                    body_provider = body_json.get("provider")
                     if "payload" in body_json:
                         raw_input = body_json["payload"]
                     elif "message" in body_json:
@@ -132,6 +135,7 @@ async def post_triage(request: Request):
                 raw_input = body_bytes.decode("utf-8", errors="ignore")
         elif "multipart/form-data" in content_type:
             form = await request.form()
+            body_provider = form.get("provider")
             if "message" in form:
                 raw_input = form["message"]
             else:
@@ -150,6 +154,8 @@ async def post_triage(request: Request):
             raw_input = await request.body()
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error reading request body: {str(e)}")
+        
+    resolved_provider = provider or body_provider
         
     try:
         clean_text = normalize_input(raw_input)
@@ -171,7 +177,7 @@ async def post_triage(request: Request):
         )
 
     try:
-        decision = await run_triage(clean_text)
+        decision = await run_triage(clean_text, provider=resolved_provider)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Triage execution error: {str(e)}")
         
@@ -187,6 +193,24 @@ async def post_triage(request: Request):
         headers=headers
     )
 
+@app.post("/triage/groq")
+@app.post("/api/triage/groq")
+async def post_triage_groq_route(request: Request):
+    """
+    Explicitly triage message using Groq provider.
+    """
+    return await post_triage(request, provider="groq")
+
+
+@app.post("/triage/ollama")
+@app.post("/api/triage/ollama")
+async def post_triage_ollama_route(request: Request):
+    """
+    Explicitly triage message using Ollama provider.
+    """
+    return await post_triage(request, provider="ollama")
+
+
 @app.post("/batch")
 @app.post("/api/batch")
 async def post_batch(request: BatchRequest):
@@ -195,6 +219,7 @@ async def post_batch(request: BatchRequest):
     """
     start_time = time.perf_counter()
     messages = request.messages
+    provider = request.provider
     
     if len(messages) > 40:
         raise HTTPException(status_code=400, detail="Batch size exceeds maximum limit of 40 messages.")
@@ -209,7 +234,7 @@ async def post_batch(request: BatchRequest):
             else:
                 try:
                     verdict = await asyncio.wait_for(
-                        run_triage(clean_text), 
+                        run_triage(clean_text, provider=provider), 
                         timeout=15.0
                     )
                 except asyncio.TimeoutError:
@@ -260,13 +285,13 @@ async def post_batch(request: BatchRequest):
 
 @app.get("/evaluate")
 @app.get("/api/evaluate")
-async def get_evaluate():
+async def get_evaluate(provider: str = None):
     """
     Runs full evaluation against ground_truth.json dataset and returns the EvalReport.
     """
     start_time = time.perf_counter()
     try:
-        report = await run_evaluation()
+        report = await run_evaluation(provider=provider)
         elapsed_time = (time.perf_counter() - start_time) * 1000.0
         report_dict = report.model_dump() if hasattr(report, "model_dump") else report
         report_dict["latency_ms"] = round(elapsed_time, 2)

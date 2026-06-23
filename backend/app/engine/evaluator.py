@@ -27,7 +27,7 @@ class EvalReport(BaseModel):
     results: List[SingleResult]
     failures: List[SingleResult]  # only failed ones
 
-async def run_evaluation() -> EvalReport:
+async def run_evaluation(provider: str = None) -> EvalReport:
     """
     Loads ground_truth.json, runs the triage pipeline for each entry concurrently,
     and returns a structured EvalReport containing success and failure details.
@@ -51,8 +51,8 @@ async def run_evaluation() -> EvalReport:
         except Exception:
             clean_text = "UNCLASSIFIABLE_INPUT"
             
-        # Run triage live using the Groq pipeline
-        decision = await run_triage(clean_text)
+        # Run triage live using the pipeline
+        decision = await run_triage(clean_text, provider=provider)
         
         # Compare decisions exactly
         exp_cat = entry["expected_category"]

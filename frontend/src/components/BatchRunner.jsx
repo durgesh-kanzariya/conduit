@@ -6,6 +6,7 @@ const API_BASE = "http://127.0.0.1:8000";
 export default function BatchRunner() {
   const [testCases, setTestCases] = useState([]);
   const [results, setResults] = useState([]);
+  const [provider, setProvider] = useState("groq");
   const [loading, setLoading] = useState(false);
   const [runningCount, setRunningCount] = useState(0);
   const [totalTime, setTotalTime] = useState(null);
@@ -54,7 +55,7 @@ export default function BatchRunner() {
       const res = await fetch(`${API_BASE}/batch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages })
+        body: JSON.stringify({ messages, provider })
       });
 
       if (!res.ok) throw new Error("Batch run failed");
@@ -95,23 +96,36 @@ export default function BatchRunner() {
         <span className="text-xs font-bold tracking-wider uppercase text-gray-500">
           Batch Processor Action Matrix
         </span>
-        <div className="flex space-x-2">
-          <button
-            onClick={loadTestCases}
-            disabled={loading}
-            className="flex items-center space-x-1.5 bg-white border border-gray-350 hover:bg-gray-50 disabled:opacity-40 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span>Load Test Cases</span>
-          </button>
-          <button
-            onClick={runBatch}
-            disabled={loading || testCases.length === 0}
-            className="flex items-center space-x-1.5 bg-black hover:bg-gray-800 text-white disabled:opacity-40 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors"
-          >
-            <Play className="h-3.5 w-3.5 fill-current" />
-            <span>Run All {testCases.length || 40}</span>
-          </button>
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-500 font-semibold">LLM:</span>
+            <select
+              value={provider}
+              onChange={(e) => setProvider(e.target.value)}
+              className="bg-[#ffffff] border border-[#e5e7eb] text-xs text-[#111111] px-2 py-1.5 rounded focus:outline-none focus:border-[#111111] font-semibold cursor-pointer"
+            >
+              <option value="groq">Groq (llama-3.3)</option>
+              <option value="ollama">Ollama (gpt-oss)</option>
+            </select>
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={loadTestCases}
+              disabled={loading}
+              className="flex items-center space-x-1.5 bg-white border border-gray-350 hover:bg-gray-50 disabled:opacity-40 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>Load Test Cases</span>
+            </button>
+            <button
+              onClick={runBatch}
+              disabled={loading || testCases.length === 0}
+              className="flex items-center space-x-1.5 bg-black hover:bg-gray-800 text-white disabled:opacity-40 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors"
+            >
+              <Play className="h-3.5 w-3.5 fill-current" />
+              <span>Run All {testCases.length || 40}</span>
+            </button>
+          </div>
         </div>
       </div>
 
