@@ -1,0 +1,24 @@
+# Version control ignore rules
+
+# Node dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Local configuration / API keys
+.env
+backend/.env
+frontend/.env
+*.local
+
+# Python environment and caches
+.venv/
+backend/.venv/
+__pycache__/
+backend/__pycache__/
+*.pyc
+
+# Production builds
+dist/
+frontend/dist/
+backend/dist/
