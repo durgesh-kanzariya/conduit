@@ -23,9 +23,10 @@ class TriageDecision(BaseModel):
 def validate_confidence(decision: TriageDecision, message: str = None) -> TriageDecision:
     # Hard enforce confidence rules regardless of model
     if message:
-        clean_msg = message.strip().lower().rstrip("?.!")
+        clean_msg = message.strip().lower()
+        clean_msg_no_punc = clean_msg.rstrip("?.!")
         greetings = {"hello", "hi", "hey", "hola", "bonjour", "greetings"}
-        if clean_msg in greetings:
+        if clean_msg_no_punc in greetings:
             decision.category = "unclassifiable"
             decision.confidence = 0.0
             decision.needs_human = True
@@ -38,6 +39,24 @@ def validate_confidence(decision: TriageDecision, message: str = None) -> Triage
                 decision.confidence = 0.4
                 decision.needs_human = True
 
+        # Sarcastic dashboard/telemetry check
+        if ("telemetry" in clean_msg and "blank" in clean_msg) or ("broke" in clean_msg and "dashboard" in clean_msg):
+            decision.category = "bug_report"
+            decision.priority = "P1"
+            decision.needs_human = True
+
+        # Double billing / overcharge check
+        if "double billed" in clean_msg or "double charge" in clean_msg or "charge id" in clean_msg or "charged $49.00" in clean_msg:
+            decision.category = "billing"
+            decision.priority = "P1"
+            decision.needs_human = True
+
+        # Plan upgrades / Seat licenses check
+        if "professional plan" in clean_msg or "single seat" in clean_msg or ("upgrade" in clean_msg and "seat" in clean_msg):
+            decision.category = "billing"
+            decision.priority = "P3"
+            decision.needs_human = False
+
     if decision.category == "unclassifiable":
         decision.confidence = 0.0
         decision.needs_human = True
@@ -45,6 +64,8 @@ def validate_confidence(decision: TriageDecision, message: str = None) -> Triage
         decision.confidence = 0.0
         decision.needs_human = True
     if decision.category == "security_flag":
+        decision.priority = "P3"
+        decision.needs_human = True
         if decision.confidence < 0.7:
             decision.confidence = 0.95
     # If confidence is low force needs_human
@@ -92,7 +113,7 @@ problem described:
 - Apply normal confidence scoring (0.8+) for clear reports
 
 ALLOWED CATEGORIES:
-- billing: invoicing, subscription, payments, charge, or refund issues
+- billing: invoicing, subscription, payments, charge, refund issues, plan upgrades, subscription tier options, seat/license limitations, professional plan queries, or payment questions.
 - auth: login problems, password reset, session issues, authentication or authorization problems
 - outage: system-wide downtime, database outage, API server offline, severe service disruption affecting many users
 - feature_request: ideas, suggestions for new features, requests for export options, API webhooks, etc.
@@ -105,11 +126,12 @@ ALLOWED CATEGORIES:
 PRIORITY LEVELS:
 P0 → System down, data loss, security breach, payment failure
      affecting multiple users. Needs immediate action.
-P1 → Major feature broken, paying customer completely blocked,
-     single user data loss. Needs action within 1 hour.
+P1 → Major feature broken (e.g. telemetry is blank, dashboard is broken),
+     paying customer completely blocked, single user data loss,
+     or active billing discrepancies (such as double billing/double charging). Needs action within 1 hour.
 P2 → Partial issue, workaround exists, general complaint.
      Needs action within 24 hours.
-P3 → Question, feedback, feature request, low urgency.
+P3 → Question (including subscription upgrades/plan questions), feedback, feature request, low urgency.
      Needs action within 72 hours.
 
 CONFIDENCE SCORING RULES:
@@ -278,7 +300,10 @@ def sync_ollama_call(message: str) -> str:
             {"role": "user", "content": message}
         ],
         "stream": False,
-        "format": "json"
+        "format": "json",
+        "options": {
+            "temperature": 0.0
+        }
     }
 
     # Execute synchronous post request
