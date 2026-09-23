@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BarChart2, Check, X, AlertTriangle, DollarSign, Activity, ChevronRight, ChevronDown } from 'lucide-react';
 import { CategoryBadge } from './Badges';
 
-const API_BASE = 'http://127.0.0.1:8000';
+import { API_BASE } from '../config';
 
 const ENGINES = [
   { value: 'hybrid', label: 'Hybrid (Auto-route)' },

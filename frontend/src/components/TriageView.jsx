@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Send, RotateCcw, Copy, Check, Clock, User, Zap, AlertTriangle, History, X } from 'lucide-react';
 import { CategoryBadge, PriorityBadge, TierBadge, ConfidenceBar } from './Badges';
 
-const API_BASE = 'http://127.0.0.1:8000';
-const HISTORY_KEY = 'frontline_history_v2';
+import { API_BASE } from '../config';
+
+const HISTORY_KEY = 'conduit_history_v1';
 
 const FORMATS = ['Auto', 'Text', 'JSON', 'HTML', 'CSV'];
 const ENGINES = [

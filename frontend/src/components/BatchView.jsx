@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Square, Download, Clock, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { CategoryBadge, PriorityBadge, TierBadge, HumanBadge, ConfidenceBar } from './Badges';
 
-const API_BASE = 'http://127.0.0.1:8000';
+import { API_BASE } from '../config';
 const ENGINES = [
   { value: 'hybrid', label: 'Hybrid (Auto-route)' },
   { value: 'groq', label: 'Groq (gpt-oss-120b)' },

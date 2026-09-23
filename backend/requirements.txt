@@ -6,3 +6,5 @@ python-dotenv
 pypdf
 groq
 laya
+orjson
+python-multipart
