@@ -19,6 +19,8 @@ _laya_initialized = False
 # ---------------------------------------------------------------------------
 
 def is_laya_available() -> bool:
+    if os.getenv("ENABLE_LAYA", "true").lower() not in ("true", "1", "yes"):
+        return False
     try:
         import laya
         return True
@@ -28,6 +30,8 @@ def is_laya_available() -> bool:
 
 def get_laya_router():
     global _laya_router, _laya_initialized
+    if not is_laya_available():
+        return None
     if not _laya_initialized:
         _laya_initialized = True
         try:
@@ -46,6 +50,9 @@ def preload_laya():
     Preloads model weights and executes a 512-token synthetic warm-up pass during
     application lifespan to preallocate memory buffers and eliminate cold start.
     """
+    if not is_laya_available():
+        print("[STATUS] Laya Engine: Local ML model disabled via ENABLE_LAYA=false.")
+        return
     router = get_laya_router()
     if router is not None:
         try:
