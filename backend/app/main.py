@@ -43,3 +43,20 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(triage_router)
 app.include_router(eval_router)
+
+@app.get("/")
+def read_root():
+    return {
+        "status": "online",
+        "service": "Conduit AI Decision Engine",
+        "version": "1.0.0",
+        "endpoints": {
+            "health": "/health",
+            "triage": "/api/triage",
+            "batch": "/api/batch",
+            "evaluate": "/api/evaluate",
+            "docs": "/docs",
+            "gradio_ui": "/gradio"
+        }
+    }
+

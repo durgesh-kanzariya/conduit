@@ -43,7 +43,7 @@ else:
             f"Summary: {decision.summary}"
         )
 
-# Gradio Dashboard
+# Gradio Dashboard mounted at /gradio
 with gr.Blocks(title="Conduit AI Engine") as demo:
     gr.Markdown("# ⚡ Conduit AI — Intelligent Decision Routing Engine")
     gr.Markdown("The backend REST API is online and serving requests for Vercel.")
@@ -58,10 +58,6 @@ with gr.Blocks(title="Conduit AI Engine") as demo:
     btn = gr.Button("Run Triage", variant="primary")
     btn.click(fn=triage_interactive, inputs=input_text, outputs=output_text)
 
-# Mount all our FastAPI endpoints onto demo.app
-demo.app.include_router(health_router)
-demo.app.include_router(triage_router)
-demo.app.include_router(eval_router)
+# Mount Gradio at /gradio so all FastAPI endpoints (/api/triage, /health, etc.) are top-level
+app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
 
-# Launch native Gradio application
-demo.launch()
