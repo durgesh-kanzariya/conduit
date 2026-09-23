@@ -39,7 +39,7 @@ export default function Sidebar({ activeView, onNavigate }) {
             fontSize: '14.5px',
             letterSpacing: '-0.2px',
           }}>
-            Frontline
+            Conduit
           </span>
         </div>
         <div style={{
@@ -49,7 +49,7 @@ export default function Sidebar({ activeView, onNavigate }) {
           color: '#475569',
           fontWeight: 400,
         }}>
-          AI Triage System
+          Intelligent Decision Router
         </div>
       </div>
 

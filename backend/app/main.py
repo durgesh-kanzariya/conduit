@@ -24,8 +24,8 @@ async def lifespan(app: FastAPI):
     print("[STATUS] Lifespan: Teardown complete.")
 
 app = FastAPI(
-    title="Frontline AI Triage API",
-    description="Dual-tier AI-powered customer support ticket triage system.",
+    title="Conduit AI API",
+    description="High-throughput intelligent decision routing engine.",
     lifespan=lifespan,
     default_response_class=ORJSONResponse
 )

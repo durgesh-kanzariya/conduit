@@ -1,17 +1,15 @@
-# Frontline AI Triage
+# Conduit — High-Throughput Intelligent Decision Routing Engine
 
-A decoupled full-stack application designed for real-time triage and sanitization of chaotic unstructured payloads. Built using FastAPI, React + Vite + Tailwind CSS v4, and Groq's Llama 3.3 70B Versatile model.
+A high-performance system designed for real-time decision routing, sanitization, and triage of unstructured payloads. Built using FastAPI, React + Vite, local ModernBERT decision routers (Laya), and deep reasoning LLMs (Groq).
 
 ## Directory Structure
 
 ```
-frontline-ai-triage/
-├── backend/            # FastAPI python application
-│   ├── app/            # Source code
-│   │   ├── engine/     # AI routing and evaluations
-│   │   └── utils/      # Parsing and sanitization routines
-│   └── data/           # Test suites and expected targets
-└── frontend/           # React dashboard application
+conduit/
+├── backend/            # FastAPI Python application
+│   ├── app/            # Source code (routers, engine, schemas, utils)
+│   └── data/           # Ground truth benchmark evaluation suites
+└── frontend/           # React enterprise dashboard application
 ```
 
 ## Quick Start
