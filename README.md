@@ -39,13 +39,12 @@ frontline-ai-triage/
 | Component | Choice | Why |
 |---|---|---|
 | Primary LLM | Groq + llama-3.3-70b-versatile | Free tier, ~800ms latency, strong instruction following |
-| Fallback LLM | Ollama (hosted API) | No rate limits, custom model flexibility, hosted API fallback |
 | Backend | FastAPI + Python | Fast to build, async support, clean REST API |
 | Validation | Pydantic v2 | Type-safe schema enforcement on every response |
 | Input Sanitizer | BeautifulSoup4 | Strips HTML and script tags before AI sees content |
-| Frontend | React + Vite + Tailwind | Fast dev, clean UI without component libraries |
+| Frontend | React + Vite | Clean enterprise SaaS UI without bulky frameworks |
 
-We chose Groq over OpenAI because latency matters for a triage system under load. Llama 3.3 70b follows complex multi-rule prompts reliably at temperature 0.0.
+We chose Groq over OpenAI because latency matters for a triage system under load. Llama 3.3 70b follows complex multi-rule prompts reliably at temperature 0.0. Alongside Groq, the system integrates **Laya (ModernBERT)** for zero-cost, privacy-preserving local on-device decision routing.
 
 ---
 
@@ -132,7 +131,7 @@ Message wrapped in BEGIN/END markers.
 
 Layer 3 — Post-processing validation
 validate_confidence() enforces hard confidence rules on every model response regardless of what model returns.
-Consistent behavior across Groq and Ollama backends.
+Consistent behavior across backends.
 
 ---
 
@@ -147,9 +146,9 @@ garbage | multi-issue | out-of-scope | angry P1 | simple P3
 
 Results:
 - Groq llama-3.3-70b:  100% agreement
-- Ollama local model:   60% agreement (baseline before prompt/post-processing tuning)
+- Local baseline model:   60% agreement (baseline before prompt/post-processing tuning)
 
-Failure analysis (Ollama, 4 failures):
+Failure analysis (Baseline model, 4 failures):
 
 | ID | Expected | Got | Root Cause |
 |---|---|---|---|
@@ -178,7 +177,6 @@ We report these honestly because the eval system exists to find failures, not to
 | Response tokens | ~150 tokens |
 | Total per message | ~600 tokens |
 | Average latency (Groq) | 800 - 1500ms |
-| Average latency (Ollama) | hosted server dependent |
 | Cost per message (Groq) | ~$0.0002 on paid tier |
 | Cost on free tier | $0 (14,400 req/day) |
 | Batch of 40 messages | ~65 seconds |
@@ -203,5 +201,5 @@ Switch to llama-3.2-3b on Groq for simple messages (short plain text, obvious ca
 
 Built for Frontline Hackathon
 Team: durgesh-kanzariya
-Stack: FastAPI · Groq · Llama 3.3 70b · Ollama · React · Vite
+Stack: FastAPI · Groq · Llama 3.3 70b · React · Vite
 Repo: https://github.com/durgesh-kanzariya/frontline-ai-triage
