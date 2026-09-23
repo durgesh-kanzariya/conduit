@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Square, Download, Clock, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { CategoryBadge, PriorityBadge, TierBadge, HumanBadge, ConfidenceBar } from './Badges';
 
-import { fetchTestCases, triageTicket } from '../api';
+import { API_BASE } from '../config';
 const ENGINES = [
   { value: 'hybrid', label: 'Hybrid (Auto-route)' },
   { value: 'groq', label: 'Groq (gpt-oss-120b)' },
@@ -36,7 +36,9 @@ export default function BatchView() {
   const loadCases = async () => {
     try {
       setError(null);
-      const data = await fetchTestCases();
+      const r = await fetch(`${API_BASE}/api/test-cases`);
+      if (!r.ok) throw new Error('Failed to load test cases');
+      const data = await r.json();
       setTestCases(data);
       setResults([]);
       setCurrentIndex(-1);
@@ -70,12 +72,22 @@ export default function BatchView() {
         setCurrentIndex(i);
         const t1 = performance.now();
         try {
-          const data = await triageTicket(tc.payload, engine);
-          if (abortRef.current.signal.aborted) break;
+          const r = await fetch(`${API_BASE}/api/triage?provider=${engine}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payload: tc.payload }),
+            signal: abortRef.current.signal,
+          });
           const itemMs = Math.round(performance.now() - t1);
-          setResults(prev => { const u = [...prev]; u[i] = { ok: true, decision: data.decision, ms: data.latency_ms || itemMs }; return u; });
+          if (!r.ok) {
+            const err = await r.json().catch(() => ({ detail: 'Error' }));
+            setResults(prev => { const u = [...prev]; u[i] = { ok: false, error: err.detail, ms: itemMs }; return u; });
+          } else {
+            const data = await r.json();
+            setResults(prev => { const u = [...prev]; u[i] = { ok: true, decision: data.decision, ms: data.latency_ms || itemMs }; return u; });
+          }
         } catch (e) {
-          if (abortRef.current.signal.aborted) break;
+          if (e.name === 'AbortError') break;
           const itemMs = Math.round(performance.now() - t1);
           setResults(prev => { const u = [...prev]; u[i] = { ok: false, error: e.message, ms: itemMs }; return u; });
         }

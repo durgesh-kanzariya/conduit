@@ -8,5 +8,3 @@ groq
 laya
 orjson
 python-multipart
-gradio
-spaces

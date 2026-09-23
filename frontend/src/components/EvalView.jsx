@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BarChart2, Check, X, AlertTriangle, DollarSign, Activity, ChevronRight, ChevronDown } from 'lucide-react';
 import { CategoryBadge } from './Badges';
 
-import { runEvaluationSuite } from '../api';
+import { API_BASE } from '../config';
 
 const ENGINES = [
   { value: 'hybrid', label: 'Hybrid (Auto-route)' },
@@ -56,7 +56,9 @@ export default function EvalView() {
     setLoading(true);
     setError(null);
     try {
-      const data = await runEvaluationSuite(provider);
+      const r = await fetch(`${API_BASE}/api/evaluate?provider=${provider}`);
+      if (!r.ok) throw new Error('Evaluation failed');
+      const data = await r.json();
       setReport(data);
     } catch (e) {
       setError(e.message);
