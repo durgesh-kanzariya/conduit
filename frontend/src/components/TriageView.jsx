@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Send, RotateCcw, Copy, Check, Clock, User, Zap, AlertTriangle, History, X } from 'lucide-react';
 import { CategoryBadge, PriorityBadge, TierBadge, ConfidenceBar } from './Badges';
 
-import { API_BASE } from '../config';
+import { triageTicket } from '../api';
 
 const HISTORY_KEY = 'conduit_history_v1';
 
@@ -44,23 +44,8 @@ export default function TriageView() {
     setError(null);
     setResult(null);
     const truncated = input.slice(0, 2000);
-    let headers = {};
-    let body = '';
-    if (format === 'Text' || format === 'CSV') {
-      headers['Content-Type'] = 'text/plain';
-      body = truncated;
-    } else if (format === 'HTML') {
-      headers['Content-Type'] = 'text/html';
-      body = truncated;
-    } else {
-      headers['Content-Type'] = 'application/json';
-      try { JSON.parse(truncated); body = truncated; }
-      catch { body = JSON.stringify({ payload: truncated }); }
-    }
     try {
-      const res = await fetch(`${API_BASE}/api/triage?provider=${engine}`, { method: 'POST', headers, body });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await triageTicket(truncated, engine);
       setResult(data);
       const entry = { id: Date.now(), payload: truncated, engine, result: data, ts: new Date().toLocaleTimeString() };
       const updated = [entry, ...history].slice(0, 10);
