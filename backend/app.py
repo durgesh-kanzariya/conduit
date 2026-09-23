@@ -8,6 +8,7 @@ try:
 except ImportError:
     SPACES_AVAILABLE = False
 
+from app.main import app as fastapi_app
 from app.routers import health_router, triage_router, eval_router
 from app.engine.triage import run_triage
 
