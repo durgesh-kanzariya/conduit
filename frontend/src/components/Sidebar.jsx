@@ -1,64 +1,71 @@
 import React from 'react';
-import { MessageSquare, Layers, BarChart2, Circle } from 'lucide-react';
+import { Zap, Layers, BarChart2 } from 'lucide-react';
 
-const NAV_ITEMS = [
-  { id: 'triage', label: 'Triage', icon: MessageSquare },
-  { id: 'batch', label: 'Batch Runner', icon: Layers },
-  { id: 'eval', label: 'Evaluation', icon: BarChart2 },
+const NAV = [
+  { id: 'triage', label: 'Triage',       Icon: Zap },
+  { id: 'batch',  label: 'Batch Runner', Icon: Layers },
+  { id: 'eval',   label: 'Evaluation',   Icon: BarChart2 },
 ];
 
-export default function Sidebar({ activeView, onNavigate }) {
+export default function Sidebar({ activeView, onNavigate, onHome }) {
   return (
     <aside style={{
-      width: '220px',
+      width: 'var(--sidebar-width)',
       minHeight: '100vh',
-      background: '#111827',
+      background: 'var(--bg-sidebar)',
+      borderRight: '1px solid var(--border)',
       display: 'flex',
       flexDirection: 'column',
       flexShrink: 0,
       position: 'sticky',
       top: 0,
+      transition: 'background 0.2s, border-color 0.2s',
     }}>
+
       {/* Logo */}
-      <div style={{
-        padding: '20px 20px 16px',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+      <button
+        onClick={onHome}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          padding: '16px 16px 14px',
+          borderBottom: '1px solid var(--border)',
+          background: 'transparent', border: 'none',
+          cursor: 'pointer', width: '100%', textAlign: 'left',
+          transition: 'background 0.1s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+        title="Back to home"
+      >
           <div style={{
-            width: '24px', height: '24px',
-            background: '#1E40AF',
-            borderRadius: '5px',
+            width: '22px', height: '22px',
+            background: 'var(--text-1)',
+            borderRadius: '4px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
           }}>
-            <MessageSquare size={13} color="#fff" />
+            <Zap size={12} color="var(--bg-sidebar)" strokeWidth={2.5} />
           </div>
           <span style={{
-            color: '#F1F5F9',
-            fontWeight: 600,
-            fontSize: '14.5px',
-            letterSpacing: '-0.2px',
+            fontSize: '14px', fontWeight: 600,
+            color: 'var(--text-1)', letterSpacing: '-0.2px',
           }}>
             Conduit
           </span>
-        </div>
-        <div style={{
-          marginTop: '4px',
-          paddingLeft: '33px',
-          fontSize: '11px',
-          color: '#475569',
-          fontWeight: 400,
-        }}>
-          Intelligent Decision Router
-        </div>
-      </div>
+      </button>
 
-      {/* Navigation */}
-      <nav style={{ padding: '12px 10px', flex: 1 }}>
-        <div style={{ fontSize: '10px', fontWeight: 600, color: '#374151', letterSpacing: '0.08em', textTransform: 'uppercase', paddingLeft: '10px', marginBottom: '6px' }}>
+      {/* Nav */}
+      <nav style={{ padding: '8px 8px', flex: 1 }}>
+        <div style={{
+          fontSize: '10.5px', fontWeight: 600,
+          color: 'var(--text-4)', letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          padding: '8px 8px 4px',
+        }}>
           Workspace
         </div>
-        {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+
+        {NAV.map(({ id, label, Icon }) => {
           const active = activeView === id;
           return (
             <button
@@ -66,65 +73,64 @@ export default function Sidebar({ activeView, onNavigate }) {
               onClick={() => onNavigate(id)}
               style={{
                 width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '9px',
-                padding: '7px 10px',
-                marginBottom: '2px',
-                borderRadius: '6px',
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '6px 8px',
+                marginBottom: '1px',
+                borderRadius: 'var(--radius)',
                 border: 'none',
-                cursor: 'pointer',
-                background: active ? 'rgba(30,64,175,0.18)' : 'transparent',
-                color: active ? '#93C5FD' : '#9CA3AF',
+                background: active ? 'var(--bg-active)' : 'transparent',
+                color: active ? 'var(--text-1)' : 'var(--text-2)',
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '13.5px',
                 fontWeight: active ? 500 : 400,
                 textAlign: 'left',
-                transition: 'background 0.15s, color 0.15s',
+                cursor: 'pointer',
+                transition: 'background 0.1s, color 0.1s',
+                position: 'relative',
               }}
               onMouseEnter={e => {
                 if (!active) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                  e.currentTarget.style.color = '#D1D5DB';
+                  e.currentTarget.style.background = 'var(--bg-hover)';
+                  e.currentTarget.style.color = 'var(--text-1)';
                 }
               }}
               onMouseLeave={e => {
                 if (!active) {
                   e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#9CA3AF';
+                  e.currentTarget.style.color = 'var(--text-2)';
                 }
               }}
             >
-              <Icon size={14} />
-              <span>{label}</span>
+              {/* Active indicator */}
               {active && (
                 <div style={{
-                  marginLeft: 'auto',
-                  width: '5px', height: '5px',
-                  borderRadius: '50%',
-                  background: '#3B82F6',
+                  position: 'absolute', left: 0, top: '20%', bottom: '20%',
+                  width: '2px', borderRadius: '0 2px 2px 0',
+                  background: 'var(--text-1)',
                 }} />
               )}
+              <Icon size={14} strokeWidth={active ? 2 : 1.7} style={{ flexShrink: 0 }} />
+              {label}
             </button>
           );
         })}
       </nav>
 
-      {/* Footer status */}
+      {/* Status */}
       <div style={{
-        padding: '14px 20px',
-        borderTop: '1px solid rgba(255,255,255,0.07)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '7px',
+        padding: '12px 16px',
+        borderTop: '1px solid var(--border)',
+        display: 'flex', alignItems: 'center', gap: '6px',
       }}>
         <div style={{
-          width: '7px', height: '7px',
+          width: '6px', height: '6px',
           borderRadius: '50%',
-          background: '#22C55E',
-          boxShadow: '0 0 0 2px rgba(34,197,94,0.2)',
+          background: 'var(--accent)',
+          flexShrink: 0,
         }} />
-        <span style={{ fontSize: '12px', color: '#6B7280' }}>System Online</span>
+        <span style={{ fontSize: '12px', color: 'var(--text-3)', fontWeight: 400 }}>
+          Connected
+        </span>
       </div>
     </aside>
   );

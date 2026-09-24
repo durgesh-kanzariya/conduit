@@ -80,6 +80,12 @@ async def get_evaluate(provider: str = None):
     Runs full evaluation against ground_truth.json dataset and returns the EvalReport.
     """
     start_time = time.perf_counter()
+    from app.engine.laya_engine import is_laya_available
+    if provider == "laya" and not is_laya_available():
+        raise HTTPException(
+            status_code=400,
+            detail="Local Laya model is not available in cloud deployment. Please clone/download the repository and run locally on your PC to test the ModernBERT engine."
+        )
     try:
         report = await run_evaluation(provider=provider)
         elapsed_time = (time.perf_counter() - start_time) * 1000.0

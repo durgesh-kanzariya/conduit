@@ -21,6 +21,9 @@ _laya_initialized = False
 def is_laya_available() -> bool:
     if os.getenv("ENABLE_LAYA", "true").lower() not in ("true", "1", "yes"):
         return False
+    # If on Render.com or cloud environment without sufficient memory
+    if os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"):
+        return False
     try:
         import laya
         return True
@@ -201,21 +204,22 @@ _INJECTION_PATTERNS = [
 
 # Definitive outage signals (whole-service down, P0)
 _OUTAGE_P0_PATTERNS = [
-    re.compile(r"(entire|all|every)\s+(app|service|system|api|enterprise)\s+(is\s+)?(down|dead|offline|unavailable)", re.I),
-    re.compile(r"(production\s+)?(api|service|endpoint|system)\s+(is\s+)?(completely\s+)?(down|dead|broken|unavailable)", re.I),
-    re.compile(r"500\s+server\s+error", re.I),
+    re.compile(r"(entire|all|every)\s+(app|service|system|api|enterprise|infrastructure)\s+(is\s+)?(down|dead|offline|unavailable)", re.I),
+    re.compile(r"(production\s+)?(api|service|endpoint|system|database|db|cluster|server)\s+(is\s+|has\s+been\s+)?(completely\s+)?(down|dead|broken|unavailable|unresponsive)", re.I),
+    re.compile(r"(database|db|server)\s+(has\s+been\s+|is\s+)(down|dead|unresponsive|offline)", re.I),
+    re.compile(r"(500\s+server\s+error|503\s+service\s+unavailable|gateway\s+timeout)", re.I),
     re.compile(r"(data\s+loss|data\s+corruption|disk\s+corruption)", re.I),
     re.compile(r"(none|no)\s+(of\s+)?(our\s+)?clients?\s+can", re.I),
     re.compile(r"checkout\s+funnel\s+is\s+(completely\s+)?dead", re.I),
-    re.compile(r"losing\s+thousands", re.I),
+    re.compile(r"losing\s+(thousands|orders|customers|revenue|money|sales)", re.I),
     re.compile(r"telemetry\s+storage\s+cluster", re.I),
     re.compile(r"all\s+(production|prod)\s+requests?\s+fail", re.I),
 ]
 
-# Out-of-scope: clearly unrelated content
+# Out-of-scope: strictly food orders, resume submissions, trivia
 _OUT_OF_SCOPE_PATTERNS = [
-    re.compile(r"(order|deliver|pizza|burger|food|meal|restaurant|pepperoni|mozzarella|toppings)", re.I),
-    re.compile(r"(hiring\s+manager|job\s+application|apply\s+for\s+the|senior\s+devops|resume|qualifications)", re.I),
+    re.compile(r"(order\s+a\s+(pizza|burger|food|meal)|pizza|burger|pepperoni|mozzarella|toppings|restaurant|recipe|menu)", re.I),
+    re.compile(r"(hiring\s+manager|job\s+application|apply\s+for\s+the|senior\s+devops\s+role|my\s+resume|curriculum\s+vitae)", re.I),
     re.compile(r"(grace\s+hopper|first\s+computer\s+bug|moth\s+found|historical\s+fact|did\s+you\s+know)", re.I),
 ]
 
@@ -257,7 +261,17 @@ def _deterministic_pre_process(text: str) -> Optional[Dict[str, Any]]:
                 confidence=0.99,
             )
 
-    # 3. Out-of-scope
+    # 3. Clear P0 outage signals (Check outage BEFORE checking out-of-scope!)
+    for pat in _OUTAGE_P0_PATTERNS:
+        if pat.search(stripped):
+            print("[DETERMINISTIC] P0 outage signal detected -> outage / P0")
+            return _make_decision(
+                "outage", "P0",
+                "Critical production outage affecting all users.",
+                confidence=0.98,
+            )
+
+    # 4. Out-of-scope (strictly food, job application, or trivia)
     for pat in _OUT_OF_SCOPE_PATTERNS:
         if pat.search(stripped):
             print("[DETERMINISTIC] Out-of-scope content detected -> out_of_scope / P3")
@@ -265,16 +279,6 @@ def _deterministic_pre_process(text: str) -> Optional[Dict[str, Any]]:
                 "out_of_scope", "P3",
                 "Message is unrelated to software support services.",
                 confidence=0.99,
-            )
-
-    # 4. Clear P0 outage signals
-    for pat in _OUTAGE_P0_PATTERNS:
-        if pat.search(stripped):
-            print("[DETERMINISTIC] P0 outage signal detected -> outage / P0")
-            return _make_decision(
-                "outage", "P0",
-                "Critical production outage affecting all users.",
-                confidence=0.97,
             )
 
     return None  # Fall through to Laya model inference
@@ -347,7 +351,7 @@ def _boost_signal(text: str) -> str:
         hints.append("SIGNAL:bug_report")
 
     # Outage
-    outage_kws = ["down", "outage", "dead", "500", "unavailable", "offline"]
+    outage_kws = ["down", "outage", "dead", "500", "503", "unavailable", "offline", "database", "critical", "losing orders"]
     if any(kw in text.lower() for kw in outage_kws):
         hints.append("SIGNAL:outage")
 

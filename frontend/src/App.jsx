@@ -1,55 +1,82 @@
-import React, { useState } from 'react';
-import Sidebar from './components/Sidebar';
+import React, { useState, useEffect } from 'react';
+import TopNav from './components/TopNav';
+import LandingPage from './components/LandingPage';
 import TriageView from './components/TriageView';
 import BatchView from './components/BatchView';
 import EvalView from './components/EvalView';
+import { EngineProvider } from './context/EngineContext';
 
-const VIEWS = {
+const DASHBOARD_VIEWS = {
   triage: TriageView,
-  batch: BatchView,
-  eval: EvalView,
-};
-
-const VIEW_LABELS = {
-  triage: 'Triage',
-  batch: 'Batch Runner',
-  eval: 'Evaluation',
+  batch:  BatchView,
+  eval:   EvalView,
 };
 
 export default function App() {
-  const [view, setView] = useState('triage');
-  const ActiveView = VIEWS[view] || TriageView;
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'triage' | 'batch' | 'eval'
+  const [theme, setTheme] = useState(() => localStorage.getItem('conduit-theme') || 'light');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('conduit-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => (t === 'light' ? 'dark' : 'light'));
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F8FAFC' }}>
-      <Sidebar activeView={view} onNavigate={setView} />
+    <EngineProvider>
+      <AppContent
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
+    </EngineProvider>
+  );
+}
 
-      {/* Main content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {/* Top bar */}
-        <header style={{
-          height: '48px',
-          borderBottom: '1px solid #E2E8F0',
-          background: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 24px',
-          gap: '6px',
-          flexShrink: 0,
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-        }}>
-          <span style={{ fontSize: '12px', color: '#94A3B8' }}>Workspace</span>
-          <span style={{ fontSize: '12px', color: '#CBD5E1' }}>/</span>
-          <span style={{ fontSize: '12px', fontWeight: 500, color: '#0F172A' }}>{VIEW_LABELS[view]}</span>
-        </header>
+function AppContent({ activeTab, setActiveTab, theme, toggleTheme }) {
+  /* ── Landing / Home view ── */
+  if (activeTab === 'home') {
+    return (
+      <LandingPage
+        onSelectTab={setActiveTab}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
+    );
+  }
 
-        {/* View content */}
-        <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+  /* ── Workspace / Tool views (Triage, Batch, Eval) ── */
+  const ActiveView = DASHBOARD_VIEWS[activeTab] || TriageView;
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'var(--bg)',
+      transition: 'background 0.2s',
+    }}>
+      <TopNav
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+
+      <main style={{
+        flex: 1,
+        width: '100%',
+        maxWidth: '1080px',
+        margin: '0 auto',
+        padding: '32px 24px 64px',
+        boxSizing: 'border-box',
+      }}>
+        <div key={activeTab} className="fade-in">
           <ActiveView />
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

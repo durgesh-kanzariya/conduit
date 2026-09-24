@@ -63,6 +63,13 @@ async def post_triage(request: Request, provider: str = None):
         raise HTTPException(status_code=400, detail=f"Error reading request body: {str(e)}")
         
     resolved_provider = provider or body_provider
+    if resolved_provider == "laya":
+        from app.engine.laya_engine import is_laya_available
+        if not is_laya_available():
+            raise HTTPException(
+                status_code=400,
+                detail="The local Laya (ModernBERT) model cannot be run on the live cloud deployment (Render.com). Please download/clone the project to run Laya locally on your PC, or switch to Groq / Hybrid engine."
+            )
         
     try:
         clean_text = normalize_input(raw_input)

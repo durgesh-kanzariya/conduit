@@ -1,131 +1,89 @@
 import React from 'react';
 
-// Pill badge for category
+/* ── Category Badge ── */
+const CAT_CLASS = {
+  billing:         'cat-billing',
+  auth:            'cat-auth',
+  outage:          'cat-outage',
+  bug_report:      'cat-bug_report',
+  feature_request: 'cat-feature_request',
+  feedback:        'cat-feedback',
+  security_flag:   'cat-security_flag',
+  out_of_scope:    'cat-out_of_scope',
+  unclassifiable:  'cat-unclassifiable',
+};
+
 export function CategoryBadge({ category }) {
-  const map = {
-    billing:         { bg: '#EFF6FF', color: '#1D4ED8', border: '#BFDBFE' },
-    auth:            { bg: '#FFFBEB', color: '#92400E', border: '#FDE68A' },
-    outage:          { bg: '#FEF2F2', color: '#991B1B', border: '#FECACA' },
-    bug_report:      { bg: '#F0FDF4', color: '#166534', border: '#BBF7D0' },
-    feature_request: { bg: '#F5F3FF', color: '#5B21B6', border: '#DDD6FE' },
-    feedback:        { bg: '#F8FAFC', color: '#475569', border: '#E2E8F0' },
-    security_flag:   { bg: '#FFF7ED', color: '#C2410C', border: '#FED7AA' },
-    out_of_scope:    { bg: '#F8FAFC', color: '#64748B', border: '#E2E8F0' },
-    unclassifiable:  { bg: '#F8FAFC', color: '#94A3B8', border: '#E2E8F0' },
-  };
-  const style = map[category] || map.unclassifiable;
+  const cls = CAT_CLASS[category] || 'cat-unclassifiable';
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      padding: '2px 8px',
-      borderRadius: '3px',
-      fontSize: '11.5px',
-      fontWeight: 500,
-      background: style.bg,
-      color: style.color,
-      border: `1px solid ${style.border}`,
-      textTransform: 'capitalize',
-      whiteSpace: 'nowrap',
-    }}>
+    <span className={`badge ${cls}`} style={{ textTransform: 'capitalize' }}>
       {(category || 'unknown').replace(/_/g, ' ')}
     </span>
   );
 }
 
-// Priority badge
+/* ── Priority Badge ── */
 export function PriorityBadge({ priority }) {
-  const map = {
-    P0: { bg: '#7F1D1D', color: '#FEE2E2', border: '#991B1B' },
-    P1: { bg: '#78350F', color: '#FEF3C7', border: '#92400E' },
-    P2: { bg: '#1E3A5F', color: '#DBEAFE', border: '#1E40AF' },
-    P3: { bg: '#1E293B', color: '#CBD5E1', border: '#334155' },
-  };
-  const style = map[priority] || map.P3;
-  return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      padding: '1px 7px',
-      borderRadius: '3px',
-      fontSize: '11.5px',
-      fontWeight: 700,
-      fontFamily: 'monospace',
-      background: style.bg,
-      color: style.color,
-      border: `1px solid ${style.border}`,
-      letterSpacing: '0.03em',
-    }}>
-      {priority}
-    </span>
-  );
+  const cls = `prio-${priority}` in {'prio-P0':1,'prio-P1':1,'prio-P2':1,'prio-P3':1}
+    ? `prio-${priority}` : 'prio-P3';
+  return <span className={`badge ${cls}`}>{priority || 'P3'}</span>;
 }
 
-// Tier badge - understated
+/* ── Tier Badge ── */
 export function TierBadge({ tier }) {
-  const isLaya = String(tier).toLowerCase().includes('laya');
-  const isFallback = String(tier).toLowerCase().includes('fallback');
+  const s = String(tier || '').toLowerCase();
+  const isLaya     = s.includes('laya');
+  const isFallback = s.includes('fallback');
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '4px',
-      padding: '1px 7px',
-      borderRadius: '3px',
-      fontSize: '11px',
-      fontWeight: 500,
+    <span className="badge" style={{
+      background: 'var(--bg-hover)',
+      color: 'var(--text-2)',
+      border: '1px solid var(--border)',
       fontFamily: 'monospace',
-      background: isFallback ? '#FFF7ED' : isLaya ? '#F0FDF4' : '#F8FAFC',
-      color: isFallback ? '#C2410C' : isLaya ? '#15803D' : '#475569',
-      border: `1px solid ${isFallback ? '#FED7AA' : isLaya ? '#BBF7D0' : '#E2E8F0'}`,
+      fontSize: '11px',
     }}>
-      {isLaya ? '⚡' : '☁'} {isLaya ? 'Laya' : 'Groq'}{isFallback ? ' (fb)' : ''}
+      {isLaya ? 'Laya' : 'Groq'}{isFallback ? ' ↩' : ''}
     </span>
   );
 }
 
-// Confidence bar
+/* ── Confidence Bar ── */
 export function ConfidenceBar({ confidence }) {
-  const pct = Math.round((confidence || 0) * 100);
-  const color = pct >= 80 ? '#15803D' : pct >= 60 ? '#D97706' : '#DC2626';
+  const pct   = Math.round((confidence || 0) * 100);
+  const color = pct >= 80 ? 'var(--accent)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <div style={{
-        flex: 1,
-        height: '4px',
-        background: '#E2E8F0',
-        borderRadius: '2px',
-        overflow: 'hidden',
+        flex: 1, height: '3px',
+        background: 'var(--border)',
+        borderRadius: '2px', overflow: 'hidden',
       }}>
         <div style={{
-          width: `${pct}%`,
-          height: '100%',
-          background: color,
-          borderRadius: '2px',
+          width: `${pct}%`, height: '100%',
+          background: color, borderRadius: '2px',
           transition: 'width 0.3s ease',
         }} />
       </div>
       <span style={{
-        fontFamily: 'monospace',
-        fontSize: '11.5px',
-        fontWeight: 600,
-        color: color,
-        minWidth: '32px',
-        textAlign: 'right',
-      }}>{pct}%</span>
+        fontFamily: 'monospace', fontSize: '11.5px',
+        fontWeight: 600, color,
+        minWidth: '30px', textAlign: 'right',
+      }}>
+        {pct}%
+      </span>
     </div>
   );
 }
 
-// Human flag indicator
+/* ── Human Badge ── */
 export function HumanBadge({ needs }) {
   return (
-    <span style={{
-      fontSize: '11.5px',
-      fontWeight: 500,
-      color: needs ? '#92400E' : '#475569',
+    <span className="badge" style={{
+      background: needs ? 'var(--amber-bg)' : 'var(--bg-hover)',
+      color:      needs ? 'var(--amber-text)' : 'var(--text-3)',
+      border:     needs ? '1px solid rgba(217,119,6,0.2)' : '1px solid var(--border)',
     }}>
-      {needs ? 'Yes' : 'No'}
+      {needs ? 'Required' : 'No'}
     </span>
   );
 }

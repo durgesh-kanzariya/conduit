@@ -1,32 +1,66 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Square, Download, Clock, CheckCircle, XCircle, Loader } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Play, Square, Download, Clock, Loader, AlertTriangle } from 'lucide-react';
 import { CategoryBadge, PriorityBadge, TierBadge, HumanBadge, ConfidenceBar } from './Badges';
-
 import { API_BASE } from '../config';
-const ENGINES = [
-  { value: 'hybrid', label: 'Hybrid (Auto-route)' },
-  { value: 'groq', label: 'Groq (gpt-oss-120b)' },
-  { value: 'laya', label: 'Laya (Local)' },
-];
+import { useEngine } from '../context/EngineContext';
 
 function fmt(ms) {
   if (ms < 1000) return `${Math.round(ms)}ms`;
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
+const S = {
+  card: {
+    background: 'var(--bg-panel)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-lg)',
+    transition: 'background 0.2s, border-color 0.2s',
+  },
+  ghostBtn: {
+    display: 'inline-flex', alignItems: 'center', gap: '5px',
+    padding: '5px 11px',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius)',
+    background: 'transparent',
+    color: 'var(--text-2)',
+    fontSize: '12.5px', fontWeight: 400,
+    fontFamily: 'Inter, sans-serif',
+    cursor: 'pointer',
+    transition: 'background 0.1s, color 0.1s',
+  },
+  select: {
+    border: 'none',
+    background: 'transparent',
+    color: 'var(--text-2)',
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '12.5px',
+    outline: 'none',
+    cursor: 'pointer',
+    padding: '5px 8px',
+    borderRadius: 'var(--radius)',
+  },
+};
+
 export default function BatchView() {
-  const [testCases, setTestCases] = useState([]);
-  const [results, setResults] = useState([]);
-  const [engine, setEngine] = useState('hybrid');
-  const [loading, setLoading] = useState(false);
+  const { layaAvailable, openDownloadModal } = useEngine();
+  const [testCases,    setTestCases]    = useState([]);
+  const [results,      setResults]      = useState([]);
+  const [engine,       setEngine]       = useState(() => layaAvailable ? 'laya' : 'hybrid');
+  const [loading,      setLoading]      = useState(false);
   const [currentIndex, setCurrentIndex] = useState(-1);
-  const [elapsed, setElapsed] = useState(0);
-  const [totalTime, setTotalTime] = useState(null);
-  const [error, setError] = useState(null);
+  const [elapsed,      setElapsed]      = useState(0);
+  const [totalTime,    setTotalTime]    = useState(null);
+  const [error,        setError]        = useState(null);
 
   const abortRef = useRef(null);
   const timerRef = useRef(null);
-  const t0Ref = useRef(0);
+  const t0Ref    = useRef(0);
+
+  useEffect(() => {
+    if (!layaAvailable && engine === 'laya') {
+      setEngine('hybrid');
+    }
+  }, [layaAvailable, engine]);
 
   useEffect(() => () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -39,37 +73,31 @@ export default function BatchView() {
       const r = await fetch(`${API_BASE}/api/test-cases`);
       if (!r.ok) throw new Error('Failed to load test cases');
       const data = await r.json();
-      setTestCases(data);
-      setResults([]);
-      setCurrentIndex(-1);
-      setTotalTime(null);
-      setElapsed(0);
-    } catch (e) {
-      setError(e.message);
-    }
+      setTestCases(data); setResults([]);
+      setCurrentIndex(-1); setTotalTime(null); setElapsed(0);
+    } catch (e) { setError(e.message); }
   };
 
-  const stopBatch = () => {
-    if (abortRef.current) abortRef.current.abort();
-  };
+  const stopBatch = () => { if (abortRef.current) abortRef.current.abort(); };
 
   const runBatch = async () => {
+    if (engine === 'laya' && !layaAvailable) {
+      setError('Local Laya model is not available in cloud deployment. Please download and run the project locally.');
+      openDownloadModal();
+      return;
+    }
     if (!testCases.length) { setError('Load test cases first.'); return; }
     abortRef.current = new AbortController();
-    setLoading(true);
-    setError(null);
+    setLoading(true); setError(null);
     setResults(new Array(testCases.length).fill(null));
-    setCurrentIndex(0);
-    setTotalTime(null);
-    t0Ref.current = performance.now();
-    setElapsed(0);
+    setCurrentIndex(0); setTotalTime(null);
+    t0Ref.current = performance.now(); setElapsed(0);
     timerRef.current = setInterval(() => setElapsed(Math.round(performance.now() - t0Ref.current)), 100);
 
     try {
       for (let i = 0; i < testCases.length; i++) {
         if (abortRef.current.signal.aborted) break;
-        const tc = testCases[i];
-        setCurrentIndex(i);
+        const tc = testCases[i]; setCurrentIndex(i);
         const t1 = performance.now();
         try {
           const r = await fetch(`${API_BASE}/api/triage?provider=${engine}`, {
@@ -93,108 +121,133 @@ export default function BatchView() {
         }
       }
     } finally {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+      clearInterval(timerRef.current); timerRef.current = null;
       const tot = Math.round(performance.now() - t0Ref.current);
-      setElapsed(tot);
-      setTotalTime(tot);
-      setLoading(false);
-      setCurrentIndex(-1);
+      setElapsed(tot); setTotalTime(tot); setLoading(false); setCurrentIndex(-1);
     }
   };
 
-  const done = results.filter(r => r !== null).length;
+  const done      = results.filter(r => r !== null).length;
   const succeeded = results.filter(r => r?.ok).length;
-  const pct = testCases.length ? Math.round((done / testCases.length) * 100) : 0;
-  const avgMs = results.filter(r => r?.ok).length
-    ? Math.round(results.filter(r => r?.ok).reduce((s, r) => s + r.ms, 0) / results.filter(r => r?.ok).length)
+  const pct       = testCases.length ? Math.round((done / testCases.length) * 100) : 0;
+  const avgMs     = succeeded
+    ? Math.round(results.filter(r => r?.ok).reduce((s, r) => s + r.ms, 0) / succeeded)
     : null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#0F172A' }}>Batch Runner</h2>
-          <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#94A3B8' }}>
-            Run all 40 test cases through the triage pipeline
-          </p>
+    <div>
+      {/* ── Page header ── */}
+      <div style={{ marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.3px' }}>
+          Batch Runner
+        </h1>
+        <p style={{ fontSize: '13px', color: 'var(--text-3)', marginTop: '3px' }}>
+          Run all test cases through the triage pipeline
+        </p>
+      </div>
+
+      {/* ── Cloud Banner if Laya unavailable ── */}
+      {!layaAvailable && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '9px 14px', marginBottom: '14px',
+          background: 'rgba(217, 119, 6, 0.08)',
+          border: '1px solid rgba(217, 119, 6, 0.25)',
+          borderRadius: 'var(--radius)',
+          fontSize: '12.5px', color: 'var(--text-2)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertTriangle size={14} color="#D97706" style={{ flexShrink: 0 }} />
+            <span>
+              <strong>Cloud Notice:</strong> Laya (ModernBERT) runs locally on PC. Cloud uses Groq / Hybrid.
+            </span>
+          </div>
+          <button
+            onClick={openDownloadModal}
+            style={{
+              background: 'transparent', border: 'none', color: 'var(--accent)',
+              fontWeight: 600, fontSize: '12px', cursor: 'pointer', textDecoration: 'underline',
+              whiteSpace: 'nowrap', padding: '2px 6px',
+            }}
+          >
+            Run Laya Locally &rarr;
+          </button>
+        </div>
+      )}
+
+      {/* ── Controls ── */}
+      <div style={{
+        ...S.card,
+        padding: '12px 16px',
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px',
+        marginBottom: '12px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-2)' }}>
+          {testCases.length > 0
+            ? <><strong style={{ color: 'var(--text-1)' }}>{testCases.length}</strong> cases loaded</>
+            : 'Load cases to begin'
+          }
+          {done > 0 && !loading && (
+            <span style={{ color: 'var(--text-3)', fontSize: '12.5px' }}>
+              · {succeeded}/{done} passed · avg {avgMs ? fmt(avgMs) : '—'}
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <select
             value={engine}
-            onChange={e => setEngine(e.target.value)}
-            disabled={loading}
-            style={{
-              padding: '6px 10px',
-              border: '1px solid #E2E8F0',
-              borderRadius: '5px',
-              fontSize: '12.5px',
-              color: '#0F172A',
-              background: '#fff',
-              fontFamily: 'Inter, sans-serif',
-              outline: 'none',
-              cursor: 'pointer',
+            onChange={e => {
+              if (e.target.value === 'laya' && !layaAvailable) {
+                openDownloadModal();
+                return;
+              }
+              setEngine(e.target.value);
             }}
+            disabled={loading}
+            style={{ ...S.select, border: '1px solid var(--border)' }}
           >
-            {ENGINES.map(e => <option key={e.value} value={e.value}>{e.label}</option>)}
+            <option value="hybrid">Hybrid (Auto-route)</option>
+            <option value="groq">Groq (gpt-oss-120b)</option>
+            <option value="laya" disabled={!layaAvailable}>
+              {layaAvailable ? 'Laya (Local ModernBERT)' : 'Laya (Local Only - Unavailable on Cloud)'}
+            </option>
           </select>
 
           <button
-            onClick={loadCases}
-            disabled={loading}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '5px',
-              padding: '6px 12px',
-              border: '1px solid #E2E8F0',
-              borderRadius: '5px',
-              background: '#fff',
-              color: '#475569',
-              fontSize: '12.5px',
-              fontFamily: 'Inter, sans-serif',
-              cursor: 'pointer',
-              fontWeight: 500,
-            }}
+            onClick={loadCases} disabled={loading}
+            style={S.ghostBtn}
+            onMouseEnter={e => { if (!loading) { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.color = 'var(--text-1)'; } }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-2)'; }}
           >
-            <Download size={13} />
-            Load
+            <Download size={13} /> Load
           </button>
 
           {loading ? (
             <button
               onClick={stopBatch}
               style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                padding: '6px 14px',
-                border: 'none',
-                borderRadius: '5px',
-                background: '#DC2626',
-                color: '#fff',
-                fontSize: '12.5px',
-                fontFamily: 'Inter, sans-serif',
-                cursor: 'pointer',
-                fontWeight: 500,
+                ...S.ghostBtn,
+                color: 'var(--red-text)', borderColor: 'rgba(220,38,38,0.3)',
+                background: 'var(--red-bg)',
               }}
             >
               <Square size={12} /> Stop
             </button>
           ) : (
             <button
-              onClick={runBatch}
-              disabled={!testCases.length}
+              onClick={runBatch} disabled={!testCases.length}
               style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                padding: '6px 14px',
-                border: 'none',
-                borderRadius: '5px',
-                background: testCases.length ? '#1E40AF' : '#CBD5E1',
+                ...S.ghostBtn,
+                background: testCases.length ? 'var(--accent)' : 'var(--border-mid)',
                 color: '#fff',
-                fontSize: '12.5px',
-                fontFamily: 'Inter, sans-serif',
+                borderColor: testCases.length ? 'var(--accent)' : 'var(--border-mid)',
                 cursor: testCases.length ? 'pointer' : 'not-allowed',
                 fontWeight: 500,
               }}
+              onMouseEnter={e => { if (testCases.length) e.currentTarget.style.background = 'var(--accent-hover)'; }}
+              onMouseLeave={e => { if (testCases.length) e.currentTarget.style.background = 'var(--accent)'; }}
             >
               <Play size={12} /> Run {testCases.length || 40}
             </button>
@@ -202,45 +255,48 @@ export default function BatchView() {
         </div>
       </div>
 
-      {/* Error */}
+      {/* ── Error ── */}
       {error && (
-        <div style={{ padding: '10px 12px', border: '1px solid #FECACA', borderRadius: '5px', background: '#FEF2F2', color: '#991B1B', fontSize: '12.5px' }}>
-          {error}
+        <div style={{
+          display: 'flex', gap: '8px', alignItems: 'center',
+          padding: '10px 14px', marginBottom: '12px',
+          background: 'var(--red-bg)', color: 'var(--red-text)',
+          border: '1px solid rgba(220,38,38,0.2)',
+          borderRadius: 'var(--radius-lg)', fontSize: '13px',
+        }}>
+          <AlertTriangle size={14} /> {error}
         </div>
       )}
 
-      {/* Progress bar + live stats */}
+      {/* ── Progress ── */}
       {testCases.length > 0 && (loading || done > 0) && (
-        <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ ...S.card, padding: '14px 16px', marginBottom: '12px' }}>
           {/* Active task */}
           {loading && currentIndex >= 0 && testCases[currentIndex] && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Loader size={13} color="#1E40AF" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
-              <span style={{ fontSize: '12px', color: '#475569' }}>
-                Processing <strong style={{ color: '#0F172A' }}>#{testCases[currentIndex].id}</strong>
-                <span style={{ color: '#94A3B8', marginLeft: '8px', fontFamily: 'monospace', fontSize: '11px' }}>
-                  {String(testCases[currentIndex].payload).slice(0, 70)}...
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <Loader size={13} color="var(--accent)" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+              <span style={{ fontSize: '12.5px', color: 'var(--text-2)' }}>
+                Processing <strong style={{ color: 'var(--text-1)' }}>#{testCases[currentIndex].id}</strong>
+                <span style={{ color: 'var(--text-3)', marginLeft: '8px', fontFamily: 'monospace', fontSize: '11.5px' }}>
+                  {String(testCases[currentIndex].payload).slice(0, 60)}…
                 </span>
               </span>
-              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', color: '#64748B', fontSize: '12px', fontFamily: 'monospace' }}>
-                <Clock size={12} />
-                {fmt(elapsed)}
-              </div>
+              <span style={{ marginLeft: 'auto', fontFamily: 'monospace', fontSize: '12px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Clock size={11} /> {fmt(elapsed)}
+              </span>
             </div>
           )}
 
           {/* Progress bar */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-              <span style={{ fontSize: '11.5px', color: '#64748B' }}>{done} of {testCases.length} processed</span>
-              <span style={{ fontSize: '11.5px', color: '#64748B', fontFamily: 'monospace' }}>{pct}%</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>{done} of {testCases.length}</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-2)', fontFamily: 'monospace', fontWeight: 500 }}>{pct}%</span>
             </div>
-            <div style={{ height: '5px', background: '#E2E8F0', borderRadius: '3px', overflow: 'hidden' }}>
+            <div style={{ height: '3px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
               <div style={{
-                height: '100%',
-                width: `${pct}%`,
-                background: '#1E40AF',
-                borderRadius: '3px',
+                height: '100%', width: `${pct}%`,
+                background: 'var(--accent)', borderRadius: '2px',
                 transition: 'width 0.2s ease',
               }} />
             </div>
@@ -248,18 +304,17 @@ export default function BatchView() {
 
           {/* Summary metrics */}
           {!loading && done > 0 && (
-            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', paddingTop: '4px', borderTop: '1px solid #F1F5F9' }}>
+            <div style={{ display: 'flex', gap: '24px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)', flexWrap: 'wrap' }}>
               {[
-                { label: 'Total', value: done },
-                { label: 'Passed', value: succeeded },
-                { label: 'Failed', value: done - succeeded },
-                { label: 'Success Rate', value: `${Math.round((succeeded / done) * 100)}%` },
-                { label: 'Total Time', value: totalTime ? fmt(totalTime) : '—' },
-                { label: 'Avg Latency', value: avgMs ? fmt(avgMs) : '—' },
-              ].map(({ label, value }) => (
+                { label: 'Passed',   value: succeeded,                            color: 'var(--accent)' },
+                { label: 'Failed',   value: done - succeeded,                      color: done - succeeded > 0 ? 'var(--red)' : 'var(--text-3)' },
+                { label: 'Rate',     value: `${Math.round((succeeded/done)*100)}%`, color: 'var(--text-1)' },
+                { label: 'Total time', value: totalTime ? fmt(totalTime) : '—',    color: 'var(--text-1)' },
+                { label: 'Avg',      value: avgMs ? fmt(avgMs) : '—',             color: 'var(--text-1)' },
+              ].map(({ label, value, color }) => (
                 <div key={label}>
-                  <div style={{ fontSize: '10px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A', fontFamily: 'monospace', marginTop: '2px' }}>{value}</div>
+                  <div style={{ fontSize: '10.5px', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '2px' }}>{label}</div>
+                  <div style={{ fontSize: '16px', fontWeight: 600, color, fontFamily: 'monospace', lineHeight: 1 }}>{value}</div>
                 </div>
               ))}
             </div>
@@ -267,27 +322,23 @@ export default function BatchView() {
         </div>
       )}
 
-      {/* Results table */}
-      {testCases.length > 0 && (
-        <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '6px', overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto', maxHeight: '480px', overflowY: 'auto' }}>
+      {/* ── Table ── */}
+      {testCases.length > 0 ? (
+        <div style={{ ...S.card, overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto', maxHeight: '520px', overflowY: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
               <thead>
-                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   {['#', 'Message', 'Category', 'Priority', 'Human?', 'Confidence', 'Engine', 'Latency'].map(h => (
                     <th key={h} style={{
-                      padding: '9px 12px',
-                      textAlign: 'left',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      color: '#64748B',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.07em',
-                      position: 'sticky',
-                      top: 0,
-                      background: '#F8FAFC',
+                      padding: '9px 12px', textAlign: 'left',
+                      fontSize: '11px', fontWeight: 600,
+                      color: 'var(--text-3)',
+                      textTransform: 'uppercase', letterSpacing: '0.07em',
+                      position: 'sticky', top: 0,
+                      background: 'var(--bg-panel)',
+                      borderBottom: '1px solid var(--border)',
                       whiteSpace: 'nowrap',
-                      borderBottom: '1px solid #E2E8F0',
                     }}>
                       {h}
                     </th>
@@ -301,38 +352,42 @@ export default function BatchView() {
                   const payload = String(typeof tc.payload === 'object' ? JSON.stringify(tc.payload) : tc.payload);
                   return (
                     <tr key={tc.id} style={{
-                      borderBottom: '1px solid #F1F5F9',
-                      background: isCurrent ? '#EFF6FF' : i % 2 === 0 ? '#fff' : '#FAFAFA',
-                      opacity: !r && !isCurrent ? 0.45 : 1,
-                    }}>
-                      <td style={{ padding: '8px 12px', fontFamily: 'monospace', color: '#94A3B8', fontSize: '11.5px' }}>{tc.id}</td>
-                      <td style={{ padding: '8px 12px', maxWidth: '240px' }}>
-                        <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#334155' }} title={payload}>
-                          {payload.slice(0, 55)}{payload.length > 55 ? '…' : ''}
+                      borderBottom: '1px solid var(--border)',
+                      background: isCurrent ? 'var(--accent-bg)' : 'transparent',
+                      opacity: !r && !isCurrent ? 0.35 : 1,
+                      transition: 'opacity 0.2s, background 0.15s',
+                    }}
+                      onMouseEnter={e => { if (!isCurrent) e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                      onMouseLeave={e => { if (!isCurrent) e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <td style={{ padding: '8px 12px', fontFamily: 'monospace', color: 'var(--text-3)', fontSize: '11.5px' }}>{tc.id}</td>
+                      <td style={{ padding: '8px 12px', maxWidth: '220px' }}>
+                        <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-2)' }} title={payload}>
+                          {payload.slice(0, 50)}{payload.length > 50 ? '…' : ''}
                         </span>
                       </td>
                       <td style={{ padding: '8px 12px' }}>
                         {r?.ok ? <CategoryBadge category={r.decision.category} />
-                          : isCurrent ? <span style={{ color: '#94A3B8', fontSize: '11px' }}>Processing…</span>
-                          : r && !r.ok ? <span style={{ color: '#DC2626', fontSize: '11px' }}>Error</span>
-                          : <span style={{ color: '#CBD5E1', fontSize: '11px' }}>—</span>}
+                          : isCurrent ? <span style={{ color: 'var(--text-3)', fontSize: '11.5px' }}>Processing…</span>
+                          : r && !r.ok ? <span style={{ color: 'var(--red-text)', fontSize: '11.5px' }}>Error</span>
+                          : <span style={{ color: 'var(--text-4)' }}>—</span>}
                       </td>
                       <td style={{ padding: '8px 12px' }}>
-                        {r?.ok ? <PriorityBadge priority={r.decision.priority} /> : <span style={{ color: '#CBD5E1', fontSize: '11px' }}>—</span>}
+                        {r?.ok ? <PriorityBadge priority={r.decision.priority} /> : <span style={{ color: 'var(--text-4)' }}>—</span>}
                       </td>
                       <td style={{ padding: '8px 12px' }}>
-                        {r?.ok ? <HumanBadge needs={r.decision.needs_human} /> : <span style={{ color: '#CBD5E1', fontSize: '11px' }}>—</span>}
+                        {r?.ok ? <HumanBadge needs={r.decision.needs_human} /> : <span style={{ color: 'var(--text-4)' }}>—</span>}
                       </td>
-                      <td style={{ padding: '8px 12px', minWidth: '110px' }}>
-                        {r?.ok
-                          ? <ConfidenceBar confidence={r.decision.confidence} />
-                          : <span style={{ color: '#CBD5E1', fontSize: '11px' }}>—</span>}
+                      <td style={{ padding: '8px 12px', minWidth: '120px' }}>
+                        {r?.ok ? <ConfidenceBar confidence={r.decision.confidence} /> : <span style={{ color: 'var(--text-4)' }}>—</span>}
                       </td>
                       <td style={{ padding: '8px 12px' }}>
-                        {r?.ok ? <TierBadge tier={r.decision.tier_used} /> : <span style={{ color: '#CBD5E1', fontSize: '11px' }}>—</span>}
+                        {r?.ok ? <TierBadge tier={r.decision.tier_used} /> : <span style={{ color: 'var(--text-4)' }}>—</span>}
                       </td>
-                      <td style={{ padding: '8px 12px', fontFamily: 'monospace', color: '#475569', fontSize: '11.5px', textAlign: 'right' }}>
-                        {r ? fmt(r.ms) : isCurrent ? <Loader size={11} color="#1E40AF" style={{ animation: 'spin 1s linear infinite' }} /> : '—'}
+                      <td style={{ padding: '8px 12px', fontFamily: 'monospace', color: 'var(--text-2)', fontSize: '12px', textAlign: 'right' }}>
+                        {r ? fmt(r.ms)
+                          : isCurrent ? <Loader size={11} color="var(--accent)" style={{ animation: 'spin 1s linear infinite' }} />
+                          : '—'}
                       </td>
                     </tr>
                   );
@@ -341,22 +396,18 @@ export default function BatchView() {
             </table>
           </div>
         </div>
-      )}
-
-      {!testCases.length && (
+      ) : (
+        /* Empty state */
         <div style={{
-          border: '1px dashed #E2E8F0',
-          borderRadius: '6px',
-          padding: '48px 24px',
-          textAlign: 'center',
-          color: '#CBD5E1',
+          ...S.card, padding: '48px 24px', textAlign: 'center',
         }}>
-          <Download size={28} style={{ marginBottom: '10px', opacity: 0.4 }} />
-          <p style={{ margin: 0, fontSize: '13px' }}>Click <strong>Load</strong> to fetch the 40 test cases from the backend</p>
+          <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--text-3)' }}>
+            Click <strong style={{ color: 'var(--text-1)' }}>Load</strong> to fetch test cases from the backend, then <strong style={{ color: 'var(--text-1)' }}>Run</strong> to execute.
+          </p>
         </div>
       )}
 
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
