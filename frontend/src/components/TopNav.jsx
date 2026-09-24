@@ -1,6 +1,5 @@
 import React from 'react';
-import { Zap, Layers, BarChart2, Home, Sun, Moon, Activity, Download } from 'lucide-react';
-import { useEngine } from '../context/EngineContext';
+import { Zap, Layers, BarChart2, Home, Sun, Moon, Github } from 'lucide-react';
 
 const TABS = [
   { id: 'home',   label: 'Home',         Icon: Home },
@@ -10,7 +9,6 @@ const TABS = [
 ];
 
 export default function TopNav({ activeTab, onSelectTab, theme, onToggleTheme }) {
-  const { layaAvailable, openDownloadModal } = useEngine();
   return (
     <header style={{
       position: 'sticky',
@@ -37,7 +35,7 @@ export default function TopNav({ activeTab, onSelectTab, theme, onToggleTheme })
           cursor: 'pointer',
           padding: '4px 6px',
           borderRadius: 'var(--radius)',
-          marginRight: '8px',
+          marginRight: '12px',
           transition: 'opacity 0.15s',
         }}
         onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
@@ -66,21 +64,6 @@ export default function TopNav({ activeTab, onSelectTab, theme, onToggleTheme })
           Conduit
         </span>
       </button>
-
-      {/* Subtle version badge */}
-      <span style={{
-        fontSize: '10.5px',
-        fontWeight: 500,
-        color: 'var(--text-3)',
-        border: '1px solid var(--border)',
-        borderRadius: '4px',
-        padding: '1px 5px',
-        background: 'var(--bg)',
-        letterSpacing: '0.02em',
-        marginRight: '16px',
-      }}>
-        v2.4
-      </span>
 
       {/* Vertical separator */}
       <div style={{
@@ -141,93 +124,45 @@ export default function TopNav({ activeTab, onSelectTab, theme, onToggleTheme })
         })}
       </nav>
 
-      {/* ── Right Telemetry & Controls ── */}
+      {/* ── Right Controls ── */}
       <div style={{
         marginLeft: 'auto',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
       }}>
-        {/* Engine status indicator */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}>
-          {layaAvailable ? (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '7px',
-              padding: '4px 10px',
-              borderRadius: 'var(--radius)',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              fontSize: '12px',
-              color: 'var(--text-2)',
-            }}>
-              <span style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: 'var(--accent)',
-                boxShadow: '0 0 0 2px var(--accent-bg)',
-              }} />
-              <span style={{ fontWeight: 500, color: 'var(--text-1)' }}>ModernBERT</span>
-              <span style={{ color: 'var(--text-4)' }}>/</span>
-              <span style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-3)' }}>&lt;50ms (PC)</span>
-            </div>
-          ) : (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '4px 10px',
-                borderRadius: 'var(--radius)',
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                fontSize: '12px',
-                color: 'var(--text-2)',
-              }}>
-                <span style={{
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  background: 'var(--purple)',
-                  boxShadow: '0 0 0 2px rgba(124, 58, 237, 0.2)',
-                }} />
-                <span style={{ fontWeight: 500, color: 'var(--text-1)' }}>Groq Cloud</span>
-              </div>
-
-              <button
-                onClick={openDownloadModal}
-                title="Laya (ModernBERT) runs locally on PC. Click for download & run guide."
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '4px 8px',
-                  borderRadius: 'var(--radius)',
-                  background: 'var(--amber-bg)',
-                  border: '1px solid rgba(217, 119, 6, 0.3)',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  color: 'var(--amber-text)',
-                  cursor: 'pointer',
-                  fontFamily: 'monospace',
-                }}
-              >
-                <Download size={11} />
-                <span>Run Laya Locally</span>
-              </button>
-            </div>
-          )}
-        </div>
+        {/* GitHub link */}
+        <a
+          href="https://github.com/durgesh-kanzariya/frontline-ai-triage"
+          target="_blank"
+          rel="noreferrer"
+          title="GitHub Repository"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '5px 10px',
+            borderRadius: 'var(--radius)',
+            border: '1px solid var(--border)',
+            background: 'transparent',
+            color: 'var(--text-2)',
+            fontSize: '12.5px',
+            fontFamily: 'Inter, sans-serif',
+            textDecoration: 'none',
+            transition: 'background 0.12s, color 0.12s, border-color 0.12s',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'var(--bg-hover)';
+            e.currentTarget.style.color = 'var(--text-1)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = 'var(--text-2)';
+          }}
+        >
+          <Github size={13.5} />
+          <span>GitHub</span>
+        </a>
 
         {/* Theme toggle */}
         <button

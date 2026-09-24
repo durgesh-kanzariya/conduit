@@ -3,63 +3,7 @@ import { Cpu, Cloud, Zap, ArrowRight, Layers, BarChart2, Shield, Terminal } from
 
 export default function HeroSection({ onSelectTab }) {
   return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Header pill / telemetry status */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px',
-      }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '4px 10px',
-          borderRadius: '20px',
-          background: 'var(--bg-panel)',
-          border: '1px solid var(--border)',
-          fontSize: '11.5px',
-          fontFamily: 'monospace',
-          color: 'var(--text-2)',
-        }}>
-          <span style={{
-            width: '7px',
-            height: '7px',
-            borderRadius: '50%',
-            background: 'var(--accent)',
-            boxShadow: '0 0 6px var(--accent)',
-            display: 'inline-block',
-          }} />
-          <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>CONDUIT ENGINE</span>
-          <span style={{ color: 'var(--text-3)' }}>•</span>
-          <span>LAYA ON-DEVICE ROUTER</span>
-        </div>
-
-        {/* Live Engine Badges */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          fontSize: '11.5px',
-          color: 'var(--text-3)',
-          fontFamily: 'monospace',
-        }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Cpu size={13} color="var(--accent)" />
-            <span>ModernBERT (Laya)</span>
-          </span>
-          <span>+</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Cloud size={13} color="var(--purple)" />
-            <span>Groq LLaMA-3.3</span>
-          </span>
-          <span style={{ color: 'var(--text-4)' }}>|</span>
-          <span style={{ color: 'var(--text-2)', fontWeight: 500 }}>&lt; 30ms Latency</span>
-        </div>
-      </div>
-
+    <section style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       {/* Hero Content */}
       <div style={{ maxWidth: '820px' }}>
         <h1 style={{

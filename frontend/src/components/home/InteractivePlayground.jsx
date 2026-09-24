@@ -108,23 +108,12 @@ export default function InteractivePlayground({ onSelectTab }) {
         background: 'var(--bg-panel)',
       }}>
         <div>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '11px',
-            fontWeight: 600,
-            color: 'var(--accent)',
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            marginBottom: '4px',
-          }}>
-            <Sparkles size={13} />
-            <span>Interactive Classifier</span>
-          </div>
           <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-1)', margin: 0 }}>
-            Test Conduit Decision Routing
+            Interactive Decision Routing Console
           </h2>
+          <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--text-3)' }}>
+            Select a sample incident ticket or enter custom payload to inspect real-time routing logic.
+          </p>
         </div>
 
         <button
